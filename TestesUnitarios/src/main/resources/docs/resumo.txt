@@ -1,0 +1,35 @@
+Fast - Deve ser executado muito rapido
+Independent Deve ser independente de outros testes e isolado
+Repeatable Deve ser executado quantas vezes quizer e quando quizer
+Self-Verifying Deve saber quando foi executado e se teve sucesso eou falha
+Timely - Deve ser criado no tempo correto
+
+XUnit - framework para Java
+TestUnit - JUnit
+
+TestRnunner - que vai executar os teste e coletar os resultados
+TestFixture/TestContext -  Pré consiçoes necessarias ao teste
+Suites - onde os testes podem ser elencados que devem ser excutados
+TestResultFormatter - - que ira padronizar o formato de resultados  dos testes
+Assertions -  verificam o comortamento/estado do que está sendo testado, geralmente expressao logica. Caso a expressão nao tenha sido satisfeita o teste será parado neste momento.
+
+Janela de vidro
+Se os vidros nao forem reparados, outros podem ser quebrados .....
+
+
+Quando a class e a class de teste possuem o mesmo nome de pacote no tempo de compilacao o java entende que ambas estão no mesmo pacote, mesmo que em src distintos
+ao tentar importar classes ou acessar metodos ou variaveis que sao public, protected e default o java intende que sao do mesmo pacote, mesmo nao sendo e os encontra e compila normalmente
+
+Equals compara o objecto verificando se é a mesma intancia
+se implementarmos o equals e hashCode ele ira comparar da forma que definirmos lá
+
+Rule - permite alterar alguns comportamentos dos testes
+Normalmente o teste para na primeira acertiva que deu errado, utilizando Rule e ErrorCollector podemos verificar toda a pilha de erros e nao somente o primeiro.
+
+SUCESSO - VERDE - teste executado com sucesso atendendo a todas as expressoes das assertivas
+FALHA - AZUL -e quando o teste é executado sem problemas, mas alguma expressao/asertiva  nao foi atendida
+ERRO - VERMELHO - é quando algum problema ocorre durante um teste e impede que o mesmo seja concluido
+
+
+
+
