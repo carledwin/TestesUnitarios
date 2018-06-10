@@ -11,7 +11,11 @@ import static org.junit.Assert.fail;
 import java.util.Date;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -28,30 +32,53 @@ import com.wordpress.carledwinj.testes.unitarios.utils.DataUtils;
 
 public class LocacaoServiceTest {
 
+	//of instance
+	private LocacaoService locacaoService;
+	
+	//of class
+	private static int count = 0;
+	
+	//of instance
 	@Rule
 	public ErrorCollector errorCollector = new ErrorCollector();
 
+	//of instance
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
-	/**
-	 * FORMA ELEGANTE - nao consegue imprimir mais nada depois que a exception e lancada
-	 */
+	@Before //of instance
+	public void setUp() {
+		//System.out.println("Before");
+		locacaoService = new LocacaoService();
+		count++;
+		//System.out.println("Contador: " + count);
+	}
 	
-	/**
-	 * FORMA ROBUSTA - maior poder de tratamento e analise dos erros, consegue validar se a mensagem de erro é a esperada e validar o tipo de exception
-	 */
+	@After //of instance
+	public void tearDown() {
+		//System.out.println("After");
+	}
 	
-	/**
-	 * FORMA NOVA - consegue validar se a mensagem de erro é a esperada e validar o tipo de exception, nao consegue imprimir mais nada depois que a exception e lancada
-	 */
+	//of class
+	@BeforeClass //deve ser marcado como static pois devera ser criado antes da criacao da instancia de classe
+	public static void setUpClass() {
+		//System.out.println("static BeforeClass");
+	}
+	//of class
+	@AfterClass //deve ser marcado como static pois devera ser criado antes da criacao da instancia de classe
+	public static void tearDownClass() {
+		//System.out.println("static AfterClass");
+	}
+	
+	/**FORMA ELEGANTE - nao consegue imprimir mais nada depois que a exception e lancada*/
+	/**FORMA ROBUSTA - maior poder de tratamento e analise dos erros, consegue validar se a mensagem de erro é a esperada e validar o tipo de exception*/
+	/**FORMA NOVA - consegue validar se a mensagem de erro é a esperada e validar o tipo de exception, nao consegue imprimir mais nada depois que a exception e lancada*/
 	
 	// verificacao
 	@Test(expected = FilmeSemEstoqueException.class)
 	public void testeEleganteExceptionEspecificaLocacaoFilmeSemEstoqueException() throws Exception {
 
 		// cenario
-		LocacaoService locacaoService = new LocacaoService();
 		Usuario usuario = new Usuario("Usuario 1");
 		Filme filme = new Filme("Filme 1", 0, 5.0);
 
@@ -65,7 +92,6 @@ public class LocacaoServiceTest {
 	public void testeRobustoLocacaoUsuarioNuloException() throws FilmeSemEstoqueException {
 
 		// cenario
-		LocacaoService locacaoService = new LocacaoService();
 		Usuario usuario = null;
 		Filme filme = new Filme("Filme 1", 1, 5.0);
 
@@ -84,7 +110,6 @@ public class LocacaoServiceTest {
 	public void testeFormaNovaLocacaoFilmeNuloException() throws FilmeSemEstoqueException, LocacaoException {
 
 		// cenario
-		LocacaoService locacaoService = new LocacaoService();
 		Usuario usuario = new Usuario("Usuario 1");
 		Filme filme = null;
 
@@ -102,7 +127,6 @@ public class LocacaoServiceTest {
 	public void testeFormaNovaLocacaoFilmeSemEstoqueException() throws Exception {
 
 		// cenario
-		LocacaoService locacaoService = new LocacaoService();
 		Usuario usuario = new Usuario("Usuario 1");
 		Filme filme = new Filme("Filme 1", 0, 5.0);
 
@@ -119,7 +143,6 @@ public class LocacaoServiceTest {
 	public void testeRobustoLocacaoFilmeSemEstoqueException() {
 
 		// cenario
-		LocacaoService locacaoService = new LocacaoService();
 		Usuario usuario = new Usuario("Usuario 1");
 		Filme filme = new Filme("Filme 1", 0, 5.0);
 
@@ -137,7 +160,6 @@ public class LocacaoServiceTest {
 	public void testeRobustoComFailSeOTesteNaoFalharLocacaoFilmeSemEstoqueException() {
 
 		// cenario
-		LocacaoService locacaoService = new LocacaoService();
 		Usuario usuario = new Usuario("Usuario 1");
 		Filme filme = new Filme("Filme 1", 1, 5.0);
 
@@ -156,7 +178,6 @@ public class LocacaoServiceTest {
 	public void testeEleganteLocacaoFilmeSemEstoqueException() throws Exception {
 
 		// cenario
-		LocacaoService locacaoService = new LocacaoService();
 		Usuario usuario = new Usuario("Usuario 1");
 		Filme filme = new Filme("Filme 1", 0, 5.0);
 
@@ -168,8 +189,6 @@ public class LocacaoServiceTest {
 	public void testeLocacao() {
 
 		// cenario
-		LocacaoService locacaoService = new LocacaoService();
-
 		Usuario usuario = new Usuario("Usuario 1");
 
 		Filme filme = new Filme("Filme 1", 2, 5.0);
