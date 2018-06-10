@@ -8,12 +8,16 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
@@ -73,6 +77,150 @@ public class LocacaoServiceTest {
 	/**FORMA ELEGANTE - nao consegue imprimir mais nada depois que a exception e lancada*/
 	/**FORMA ROBUSTA - maior poder de tratamento e analise dos erros, consegue validar se a mensagem de erro é a esperada e validar o tipo de exception*/
 	/**FORMA NOVA - consegue validar se a mensagem de erro é a esperada e validar o tipo de exception, nao consegue imprimir mais nada depois que a exception e lancada*/
+
+	@Test
+	public void deveAlugarFilmeSucesso() {
+		
+		//o proprio teste indica quando pode ou nao ser executado
+		Assume.assumeFalse(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+		
+		// cenario
+		Usuario usuario = new Usuario("Usuario 1");
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 5.0));
+		
+		// acao
+		Locacao locacao;
+		try {
+			locacao = locacaoService.alugarFilme(usuario, filmes);
+
+			// verificacao
+			assertTrue(locacao.getValor() == 5.0);
+			assertTrue(DataUtils.isMesmaData(locacao.getDataLocacao(), new Date()));
+			assertTrue(DataUtils.isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)));
+
+			// Ordem de veirificacao muda assertThat(actual, matcher);
+			Assert.assertThat(locacao.getValor(), CoreMatchers.is(5.0));
+			Assert.assertThat(locacao.getValor(), CoreMatchers.is(CoreMatchers.equalTo(5.0)));
+			Assert.assertThat(locacao.getValor(), CoreMatchers.is(CoreMatchers.not(6.0)));
+
+			// com import static
+			assertThat(locacao.getValor(), is(5.0));
+			assertThat(locacao.getValor(), is(equalTo(5.0)));
+			assertThat(locacao.getValor(), is(not(6.0)));
+			assertThat(isMesmaData(locacao.getDataLocacao(), new Date()), is(true));
+		} catch (Exception e) {
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
+		}
+	}
+	
+	@Test
+	public void deveDevolverNaSegundaAoAlugarNoSabado() {
+		
+		//o proprio teste indica quando pode ou nao ser executado
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+		
+		// cenario
+		Usuario usuario = new Usuario("Usuario 1");
+
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 4.0));
+		
+		// acao
+		try {
+			Locacao locacao = locacaoService.alugarFilme(usuario, filmes);
+			
+			//verificacao
+			boolean ehDomingo = DataUtils.verificarDiaSemana(locacao.getDataRetorno(),Calendar.SUNDAY);
+			
+			Assert.assertFalse("Data de retorno do filme nao deveria ser um Domingo.", ehDomingo);
+			
+		} catch (Exception e) {
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
+		}
+
+	}
+	
+	@Test
+	public void devePagar25Porcentono3Filme() {
+
+		// cenario
+		Usuario usuario = new Usuario("Usuario 1");
+
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 4.0), new Filme("Filme 2", 2, 4.0), new Filme("Filme 3", 2, 4.0));
+		
+		// acao
+		try {
+			Locacao locacao = locacaoService.alugarFilme(usuario, filmes);
+			
+			//verificacao
+			Assert.assertThat("Deveria ganhar 25% de desconto no 3º filme.", locacao.getValor(), is(11.0));
+			
+		} catch (Exception e) {
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
+		}
+
+	}
+	
+	@Test
+	public void devePagar50Porcentono4Filme() {
+
+		// cenario
+		Usuario usuario = new Usuario("Usuario 1");
+
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 4.0), new Filme("Filme 2", 2, 4.0), new Filme("Filme 3", 2, 4.0), new Filme("Filme 4", 2, 4.0));
+		
+		// acao
+		try {
+			Locacao locacao = locacaoService.alugarFilme(usuario, filmes);
+			
+			//verificacao
+			Assert.assertThat("Deveria ganhar 50% de desconto no 4º filme.", locacao.getValor(), is(13.0));
+			
+		} catch (Exception e) {
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
+		}
+
+	}
+	
+	@Test
+	public void devePagar75Porcentono5Filme() {
+
+		// cenario
+		Usuario usuario = new Usuario("Usuario 1");
+
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 4.0), new Filme("Filme 2", 2, 4.0), new Filme("Filme 3", 2, 4.0), new Filme("Filme 4", 2, 4.0), new Filme("Filme 5", 2, 4.0));
+		
+		// acao
+		try {
+			Locacao locacao = locacaoService.alugarFilme(usuario, filmes);
+			
+			//verificacao
+			Assert.assertThat("Deveria ganhar 75% de desconto no 5º filme.", locacao.getValor(), is(14.0));
+			
+		} catch (Exception e) {
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
+		}
+	}
+	
+	@Test
+	public void devePagar100Porcentono6Filme() {
+
+		// cenario
+		Usuario usuario = new Usuario("Usuario 1");
+
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 4.0), new Filme("Filme 2", 2, 4.0), new Filme("Filme 3", 2, 4.0), new Filme("Filme 4", 2, 4.0), new Filme("Filme 5", 2, 4.0));
+		
+		// acao
+		try {
+			Locacao locacao = locacaoService.alugarFilme(usuario, filmes);
+			
+			//verificacao
+			Assert.assertThat("Deveria ganhar 100% de desconto no 6º filme.", locacao.getValor(), is(14.0));
+			
+		} catch (Exception e) {
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
+		}
+
+	}
 	
 	// verificacao
 	@Test(expected = FilmeSemEstoqueException.class)
@@ -80,10 +228,10 @@ public class LocacaoServiceTest {
 
 		// cenario
 		Usuario usuario = new Usuario("Usuario 1");
-		Filme filme = new Filme("Filme 1", 0, 5.0);
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 0, 5.0));
 
 		// acao
-		locacaoService.alugarFilme(usuario, filme);
+		locacaoService.alugarFilme(usuario, filmes);
 		
 		System.out.println("FORMA ELEGANTE - esta mensagem nunca sera impressa");
 	}
@@ -93,11 +241,11 @@ public class LocacaoServiceTest {
 
 		// cenario
 		Usuario usuario = null;
-		Filme filme = new Filme("Filme 1", 1, 5.0);
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 1, 5.0));
 
 		// acao
 		try {
-			locacaoService.alugarFilme(usuario, filme);
+			locacaoService.alugarFilme(usuario, filmes);
 			fail("Deveria lancar execption");
 		} catch (LocacaoException e) {
 			Assert.assertThat("Usuario vazio", is(e.getMessage()));
@@ -111,14 +259,14 @@ public class LocacaoServiceTest {
 
 		// cenario
 		Usuario usuario = new Usuario("Usuario 1");
-		Filme filme = null;
+		List<Filme> filmes = null;
 
 		// verificacao
 		expectedException.expect(LocacaoException.class);
-		expectedException.expectMessage("Filme vazio");
+		expectedException.expectMessage("Filmes vazio");
 
 		// acao
-		locacaoService.alugarFilme(usuario, filme);
+		locacaoService.alugarFilme(usuario, filmes);
 		
 		System.out.println("FORMA NOVA - esta mensagem nunca sera impressa");
 	}
@@ -128,14 +276,14 @@ public class LocacaoServiceTest {
 
 		// cenario
 		Usuario usuario = new Usuario("Usuario 1");
-		Filme filme = new Filme("Filme 1", 0, 5.0);
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 0, 5.0));
 
 		// verificacao
 		expectedException.expect(Exception.class);
 		expectedException.expectMessage("Filme sem estoque");
 
 		// acao
-		locacaoService.alugarFilme(usuario, filme);
+		locacaoService.alugarFilme(usuario, filmes);
 	}
 
 	// verificacao
@@ -144,11 +292,11 @@ public class LocacaoServiceTest {
 
 		// cenario
 		Usuario usuario = new Usuario("Usuario 1");
-		Filme filme = new Filme("Filme 1", 0, 5.0);
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 0, 5.0));
 
 		// acao
 		try {
-			locacaoService.alugarFilme(usuario, filme);
+			locacaoService.alugarFilme(usuario, filmes);
 		} catch (Exception e) {
 			Assert.assertThat(e.getMessage(), is("Filme sem estoque"));
 		}
@@ -161,11 +309,11 @@ public class LocacaoServiceTest {
 
 		// cenario
 		Usuario usuario = new Usuario("Usuario 1");
-		Filme filme = new Filme("Filme 1", 1, 5.0);
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 1, 5.0));
 
 		// acao
 		try {
-			locacaoService.alugarFilme(usuario, filme);
+			locacaoService.alugarFilme(usuario, filmes);
 			fail("Deveria ter lancado uma exception");// se resguardando que vai realmente falhar caso nao lance
 														// exception
 		} catch (Exception e) {
@@ -179,19 +327,19 @@ public class LocacaoServiceTest {
 
 		// cenario
 		Usuario usuario = new Usuario("Usuario 1");
-		Filme filme = new Filme("Filme 1", 0, 5.0);
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 0, 5.0));
 
 		// acao
-		locacaoService.alugarFilme(usuario, filme);
+		locacaoService.alugarFilme(usuario, filmes);
 	}
 
 	@Test
-	public void testeLocacao() {
+	public void deveAlugarFilme() {
 
 		// cenario
 		Usuario usuario = new Usuario("Usuario 1");
 
-		Filme filme = new Filme("Filme 1", 2, 5.0);
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 5.0));
 
 		/*
 		 * Acessando membros default e protected devido o nome do pacote ser o mesmo
@@ -201,7 +349,7 @@ public class LocacaoServiceTest {
 		// acao
 		Locacao locacao;
 		try {
-			locacao = locacaoService.alugarFilme(usuario, filme);
+			locacao = locacaoService.alugarFilme(usuario, filmes);
 
 			// verificacao
 			assertTrue(locacao.getValor() == 5.0);
@@ -223,7 +371,7 @@ public class LocacaoServiceTest {
 			// errorCollector.checkThat(locacao.getValor(), is(4.0));
 			// errorCollector.checkThat(locacao.getValor(), is(7.0));
 		} catch (Exception e) {
-			Assert.fail("Ocorreu uma falha, nao deveria lancar exception");
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
 		}
 
 	}

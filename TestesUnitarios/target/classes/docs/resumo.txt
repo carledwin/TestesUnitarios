@@ -2,7 +2,7 @@ Fast - Deve ser executado muito rapido
 Independent Deve ser independente de outros testes e isolado
 Repeatable Deve ser executado quantas vezes quizer e quando quizer
 Self-Verifying Deve saber quando foi executado e se teve sucesso eou falha
-Timely - Deve ser criado no tempo correto
+Timely - Deve ser criado no tempo correto / retorno sobre o investimento
 
 XUnit - framework para Java
 TestUnit - JUnit
@@ -29,6 +29,33 @@ Normalmente o teste para na primeira acertiva que deu errado, utilizando Rule e 
 SUCESSO - VERDE - teste executado com sucesso atendendo a todas as expressoes das assertivas
 FALHA - AZUL -e quando o teste é executado sem problemas, mas alguma expressao/asertiva  nao foi atendida
 ERRO - VERMELHO - é quando algum problema ocorre durante um teste e impede que o mesmo seja concluido
+
+
+TDD Test Driven Development
+
+primeiro cria o teste >>> Gera a Falha >>> Faz passar no teste (Desenvolve) >>> Refactor
+
+
+Teste sempre depois do codigo
+1º Vê que nao funcionou
+2º Vê que funcionou
+
+Desenvolvimento >>> 1º Red - Teste falha, 2º Teste passa, 3º refatora em pequenos ciclos.
+
+Desta forma o codigo vai evoluindo em pequenos passos (Baby steps) >> step by step
+
+Assume
+//o proprio teste indica quando pode ou nao ser executado
+Assume.assumeTrue(verificacao, esperado);
+
+
+
+
+
+
+
+
+
 
 
 
