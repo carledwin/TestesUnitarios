@@ -49,9 +49,12 @@ Assume
 Assume.assumeTrue(verificacao, esperado);
 
 
+Classe de equivalencia >> Classe generica
 
+Parameterized
+Criacao dinamica de testes e testes parametrizados
 
-
+//DDT - Data Driven Test - Teste orintado a dados
 
 
 
