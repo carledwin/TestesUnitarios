@@ -31,6 +31,9 @@ import com.wordpress.carledwinj.testes.unitarios.entidades.Locacao;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Usuario;
 import com.wordpress.carledwinj.testes.unitarios.exception.FilmeSemEstoqueException;
 import com.wordpress.carledwinj.testes.unitarios.exception.LocacaoException;
+import com.wordpress.carledwinj.testes.unitarios.matchers.DataDiferencaDiasMatcher;
+import com.wordpress.carledwinj.testes.unitarios.matchers.DiaSemanaMatcher;
+import com.wordpress.carledwinj.testes.unitarios.matchers.MachersProprios;
 //import com.wordpress.carledwinj.testes.unitarios.servicos.LocacaoService; //nao esta sendo importado pois esta no pacote com o mesmo nome
 import com.wordpress.carledwinj.testes.unitarios.utils.DataUtils;
 
@@ -79,6 +82,56 @@ public class LocacaoServiceTest {
 	/**FORMA NOVA - consegue validar se a mensagem de erro é a esperada e validar o tipo de exception, nao consegue imprimir mais nada depois que a exception e lancada*/
 
 	@Test
+	public void deveAlugarFilmeMatcherDesafio() {
+
+		// cenario
+		Usuario usuario = new Usuario("Usuario 1");
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 5.0));
+
+		// acao
+		Locacao locacao;
+		try {
+			locacao = locacaoService.alugarFilme(usuario, filmes);
+
+			// Rule para exibir pilha de erros
+			 errorCollector.checkThat(locacao.getValor(), is(5.0));
+			 errorCollector.checkThat(locacao.getDataLocacao(), MachersProprios.eHoje());
+			 errorCollector.checkThat(locacao.getDataRetorno(), MachersProprios.eHojeComDiferencaDias(1));
+			 
+		} catch (Exception e) {
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
+		}
+
+	}
+	
+	@Test
+	public void deveDevolverNaSegundaAoAlugarNoSabadoNovoMatcher() {
+		
+		//o proprio teste indica quando pode ou nao ser executado
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+		
+		// cenario
+		Usuario usuario = new Usuario("Usuario 1");
+
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 2, 4.0));
+		
+		// acao
+		try {
+			Locacao locacao = locacaoService.alugarFilme(usuario, filmes);
+			
+			//verificacao
+			
+			assertThat(locacao.getDataRetorno(), new DiaSemanaMatcher(Calendar.MONDAY));
+			assertThat(locacao.getDataRetorno(), MachersProprios.caiEm(Calendar.MONDAY));
+			assertThat(locacao.getDataRetorno(), MachersProprios.caiNumaSegunda(Calendar.MONDAY));
+			
+		} catch (Exception e) {
+			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
+		}
+
+	}
+	
+	@Test
 	public void deveAlugarFilmeSucesso() {
 		
 		//o proprio teste indica quando pode ou nao ser executado
@@ -112,7 +165,7 @@ public class LocacaoServiceTest {
 			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
 		}
 	}
-	
+
 	@Test
 	public void deveDevolverNaSegundaAoAlugarNoSabado() {
 		
