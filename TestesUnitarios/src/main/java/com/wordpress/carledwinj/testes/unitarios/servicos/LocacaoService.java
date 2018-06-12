@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAO;
+import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAOFake;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Filme;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Locacao;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Usuario;
@@ -19,6 +21,10 @@ public class LocacaoService {
 	private String vPrivate;
 	protected String vProtected;
 	String vDefault;
+	private LocacaoDAO locacaoDAO;
+	private SPCService spcService;
+	private EmailService emailService;
+	
 
 	public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws FilmeSemEstoqueException, LocacaoException {
 
@@ -31,12 +37,15 @@ public class LocacaoService {
 				throw new FilmeSemEstoqueException("Filme sem estoque");
 			}
 		}
-		
 
 		if (usuario == null) {
 			throw new LocacaoException("Usuario vazio");
 		}
 
+		if(spcService.possuiNegativacao(usuario)) {
+			throw new LocacaoException("Usuario Negativado");
+		}
+		
 		Locacao locacao = new Locacao();
 		locacao.setFilmes(filmes);
 		locacao.setUsuario(usuario);
@@ -69,10 +78,31 @@ public class LocacaoService {
 			locacao.setDataRetorno(DataUtils.adicionarDias(locacao.getDataRetorno(), 1));
 		}
 		
-		// Salvando a locacao...
-		// TODO adicionar método para salvar
-
+		locacaoDAO.salvar(locacao);
+		
 		return locacao;
+	}
+	
+	public void notificarAtrasos() {
+		List<Locacao> locacoes = locacaoDAO.obterLocacoesPendentes();
+		
+		for (Locacao locacao : locacoes) {
+			if(locacao.getDataRetorno().before(new Date())){
+				emailService.notificarAtraso(locacao.getUsuario());
+			}
+		}
+	}
+	
+	public void setlocacaoDAO(LocacaoDAO locacaoDAO) {
+		this.locacaoDAO = locacaoDAO;
+	}
+	
+	public void setSPCService(SPCService spcService) {
+		this.spcService = spcService;
+	}
+	
+	public void setEmailService(EmailService emailService) {
+		this.emailService = emailService;
 	}
 
 }

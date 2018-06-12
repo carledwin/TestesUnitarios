@@ -25,15 +25,17 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
 import com.wordpress.carledwinj.testes.unitarios.builders.FilmeBuilder;
 import com.wordpress.carledwinj.testes.unitarios.builders.UsuarioBuilder;
+import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAO;
+import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAOFake;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Filme;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Locacao;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Usuario;
 import com.wordpress.carledwinj.testes.unitarios.exception.FilmeSemEstoqueException;
 import com.wordpress.carledwinj.testes.unitarios.exception.LocacaoException;
-import com.wordpress.carledwinj.testes.unitarios.matchers.DataDiferencaDiasMatcher;
 import com.wordpress.carledwinj.testes.unitarios.matchers.DiaSemanaMatcher;
 import com.wordpress.carledwinj.testes.unitarios.matchers.MachersProprios;
 //import com.wordpress.carledwinj.testes.unitarios.servicos.LocacaoService; //nao esta sendo importado pois esta no pacote com o mesmo nome
@@ -59,6 +61,9 @@ public class LocacaoServiceTest {
 	public void setUp() {
 		//System.out.println("Before");
 		locacaoService = new LocacaoService();
+		LocacaoDAO locacaoDAO = new LocacaoDAOFake();
+		locacaoService.setlocacaoDAO(locacaoDAO);
+		locacaoService.setSPCService(Mockito.mock(SPCService.class));
 		count++;
 		//System.out.println("Contador: " + count);
 	}

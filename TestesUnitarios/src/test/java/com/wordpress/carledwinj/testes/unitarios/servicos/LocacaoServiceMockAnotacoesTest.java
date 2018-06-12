@@ -1,12 +1,14 @@
 package com.wordpress.carledwinj.testes.unitarios.servicos;
 
 import static com.wordpress.carledwinj.testes.unitarios.utils.DataUtils.isMesmaData;
+import static com.wordpress.carledwinj.testes.unitarios.utils.DataUtils.obterDataComDiferencaDias;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -21,9 +23,13 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import com.wordpress.carledwinj.testes.unitarios.builders.FilmeBuilder;
+import com.wordpress.carledwinj.testes.unitarios.builders.LocacaoBuilder;
 import com.wordpress.carledwinj.testes.unitarios.builders.UsuarioBuilder;
 import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAO;
 import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAOFake;
@@ -37,9 +43,8 @@ import com.wordpress.carledwinj.testes.unitarios.matchers.MachersProprios;
 //import com.wordpress.carledwinj.testes.unitarios.servicos.LocacaoService; //nao esta sendo importado pois esta no pacote com o mesmo nome
 import com.wordpress.carledwinj.testes.unitarios.utils.DataUtils;
 
-public class LocacaoServiceBuilderTest {
+public class LocacaoServiceMockAnotacoesTest {
 
-	private LocacaoService locacaoService;
 	
 	@Rule
 	public ErrorCollector errorCollector = new ErrorCollector();
@@ -47,12 +52,160 @@ public class LocacaoServiceBuilderTest {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
+	//clase em teste que recebera os mocks abaixo
+	@InjectMocks
+	private LocacaoService locacaoService;
+	
+	//cria os mocks abaixo e injeta na classe em teste locacaoService
+	@Mock
+	private SPCService spcService;
+	
+	@Mock
+	private LocacaoDAO locacaoDAO;
+	
+	@Mock
+	private EmailService emailService;
+	
 	@Before 
 	public void setUp() {
-		locacaoService = new LocacaoService();
-		LocacaoDAO locacaoDAO = new LocacaoDAOFake();
-		locacaoService.setlocacaoDAO(locacaoDAO);
-		locacaoService.setSPCService(Mockito.mock(SPCService.class));
+		MockitoAnnotations.initMocks(this);
+	}
+	
+	@Test
+	public void testeUsuarioNegativadoVerifyGenerico() throws FilmeSemEstoqueException {
+
+		// cenario
+		List<Filme> filmes = Arrays.asList(FilmeBuilder.novoFilmeDefault().build());
+		
+		//espectativa
+		Mockito.when(spcService.possuiNegativacao(Mockito.any(Usuario.class))).thenReturn(true);
+
+		// acao
+		try {
+			locacaoService.alugarFilme(UsuarioBuilder.novoUsuarioDefault().build(), filmes);
+			//verificacao
+			Assert.fail("Deveria lancar exception!");
+		} catch (LocacaoException e) {
+			
+			//verificacao2
+			Assert.assertEquals("Usuario Negativado", e.getMessage());
+		}
+		
+		Mockito.verify(spcService).possuiNegativacao(Mockito.any(Usuario.class));
+		
+		System.out.println("FORMA NOVA - esta mensagem nunca sera impressa");
+	}
+	
+	@Test
+	public void deveEnviarEmailParaLocacoesAtrasadasSemProblema() {
+		
+		//cenario
+		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
+		Usuario usuarioEmDia = UsuarioBuilder.novoUsuarioDefault().setNome("Usuario Em Dia").build();
+		Usuario usuarioAtrasado = UsuarioBuilder.novoUsuarioDefault().setNome("Usuario atrasado").build();
+		Usuario usuarioAtrasado3 = UsuarioBuilder.novoUsuarioDefault().setNome("Usuario atrasado 3").build();
+		
+		List<Locacao> locacoesPendentes = Arrays.asList(
+												LocacaoBuilder.umLocacao().comUsuario(usuario).atrasado().agora(),
+												//teste verifica que o usuario recebeu o email mais de uma vez
+												LocacaoBuilder.umLocacao().comUsuario(usuario).atrasado().agora(), 
+												LocacaoBuilder.umLocacao().comUsuario(usuarioEmDia).agora(),
+												LocacaoBuilder.umLocacao().comUsuario(usuarioAtrasado).atrasado().agora(),
+												LocacaoBuilder.umLocacao().comUsuario(usuarioAtrasado3).atrasado().agora());
+		
+		//espectativa
+		when(locacaoDAO.obterLocacoesPendentes()).thenReturn(locacoesPendentes);
+		
+		//acao
+		locacaoService.notificarAtrasos();
+		
+		Mockito.verify(emailService, Mockito.times(2)).notificarAtraso(usuario);
+		
+		Mockito.verify(emailService).notificarAtraso(usuarioAtrasado);
+		//vefifica que este metodo nunca foi chamado para o usuarioEmDia
+		Mockito.verify(emailService, Mockito.never()).notificarAtraso(usuarioEmDia);
+		
+		//verifica que este metodo nunca foi invocado/chamado
+		Mockito.verifyZeroInteractions(spcService);
+		
+	}
+	
+	@Test
+	public void deveEnviarEmailParaLocacoesAtrasadasComProblema() {
+		
+		//cenario
+		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
+		
+		List<Locacao> locacoesPendentes = Arrays.asList(
+												LocacaoBuilder
+												.umLocacao()
+												.comUsuario(usuario)
+												.comDataRetorno(obterDataComDiferencaDias(-2))
+												.agora()
+												);
+		
+		//espectativa
+		when(locacaoDAO.obterLocacoesPendentes()).thenReturn(locacoesPendentes);
+		
+		//acao
+		locacaoService.notificarAtrasos();
+		
+		//verificacao
+		Mockito.verify(emailService).notificarAtraso(usuario);
+	}
+	
+	@Test
+	public void testeUsuarioNegativadoVerifyException() throws FilmeSemEstoqueException {
+
+		// cenario
+		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
+		//teste de falso positivo
+		List<Filme> filmes = Arrays.asList(FilmeBuilder.novoFilmeDefault().build());
+		
+		//espectativa
+		Mockito.when(spcService.possuiNegativacao(usuario)).thenReturn(true);
+
+		// acao
+		try {
+			locacaoService.alugarFilme(usuario, filmes);
+			
+			//verificacao1
+			//garante que nao sera gerado um falso positivo
+			Assert.fail("Deveria lancar exception!");
+		} catch (LocacaoException e) {
+			
+			//verificacao2
+			Assert.assertEquals("Usuario Negativado", e.getMessage());
+		}
+		
+		Mockito.verify(spcService).possuiNegativacao(usuario);
+		
+		//teste de falso positivo
+		System.out.println("FORMA NOVA - esta mensagem nunca sera impressa");
+	}
+	
+	
+	@Test
+	public void testeUsuarioNegativadoException() throws FilmeSemEstoqueException, LocacaoException {
+
+		// cenario
+		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
+		//teste de falso positivo
+		List<Filme> filmes = Arrays.asList(FilmeBuilder.novoFilmeDefault().build());
+		
+		//espectativa
+		Mockito.when(spcService.possuiNegativacao(usuario)).thenReturn(true);
+		
+		// verificacao
+		expectedException.expect(LocacaoException.class);
+		expectedException.expectMessage("Usuario Negativado");
+
+		// acao
+		locacaoService.alugarFilme(usuario, filmes);
+
+		Mockito.verify(spcService).possuiNegativacao(usuario);
+		
+		System.out.println("FORMA NOVA - esta mensagem nunca sera impressa");
 	}
 	
 	@Test

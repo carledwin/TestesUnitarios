@@ -16,14 +16,13 @@ import org.junit.runners.Parameterized.Parameters;
 import org.mockito.Mockito;
 
 import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAO;
-import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAOFake;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Filme;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Locacao;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Usuario;
 
 //alterando o testRunner para que ela rode como se fosse um parameterized
 @RunWith(Parameterized.class)
-public class CalculoValorLocacaoComParametersTest {
+public class CalculoValorLocacaoMockTest {
 
 	private LocacaoService locacaoService;
 
@@ -65,7 +64,7 @@ public class CalculoValorLocacaoComParametersTest {
 	@Before
 	public void setUp() {
 		locacaoService = new LocacaoService();
-		LocacaoDAO locacaoDAO = new LocacaoDAOFake();
+		LocacaoDAO locacaoDAO = Mockito.mock(LocacaoDAO.class);
 		locacaoService.setlocacaoDAO(locacaoDAO);
 		locacaoService.setSPCService(Mockito.mock(SPCService.class));
 	}

@@ -11,7 +11,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.mockito.Mockito;
 
+import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAO;
+import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAOFake;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Filme;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Locacao;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Usuario;
@@ -29,6 +32,9 @@ public class CalculoValorLocacaoSemParametersTest {
 	@Before // of instance
 	public void setUp() {
 		locacaoService = new LocacaoService();
+		LocacaoDAO locacaoDAO = new LocacaoDAOFake();
+		locacaoService.setlocacaoDAO(locacaoDAO);
+		locacaoService.setSPCService(Mockito.mock(SPCService.class));
 	}
 
 	@Test
