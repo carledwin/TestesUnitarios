@@ -4,7 +4,7 @@ import com.wordpress.carledwinj.testes.unitarios.entidades.Locacao;
 
 import buildermaster.BuilderMaster;
 
-public class BuilderMasterTest {
+public class BuilderMasterTest { 
 
 	public static void main(String[] args) {
 
