@@ -5,7 +5,13 @@ import com.wordpress.carledwinj.testes.unitarios.exception.NaoPodeDividirPorZero
 public class Calculadora {
 
 	public int soma(int a, int b) {
+		
+		System.out.println("Chamou o metodo soma. a: " + a + "e  b: " + b);
 		return a + b;
+	}
+	
+	public void imprime(String mensagem) {
+		System.out.println("Calculadora imprimindo...  >>>> " + mensagem);
 	}
 
 	public int subtracao(int a, int b) {
