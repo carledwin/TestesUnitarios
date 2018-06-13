@@ -1,5 +1,7 @@
 package com.wordpress.carledwinj.testes.unitarios.matchers;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.hamcrest.Description;
@@ -16,6 +18,9 @@ public class DataDiferencaDiasMatcher extends TypeSafeMatcher<Date>{
 	}
 	
 	public void describeTo(Description description) {
+		Date dataEsperada = new DataUtils().obterDataComDiferencaDias(quantidadeDias);
+		DateFormat format = new SimpleDateFormat("yyyy/MM/dd");
+		description.appendText(format.format(dataEsperada));
 	}
 
 	@Override

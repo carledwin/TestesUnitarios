@@ -23,6 +23,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -39,7 +40,8 @@ import com.wordpress.carledwinj.testes.unitarios.entidades.Usuario;
 import com.wordpress.carledwinj.testes.unitarios.exception.FilmeSemEstoqueException;
 import com.wordpress.carledwinj.testes.unitarios.exception.LocacaoException;
 import com.wordpress.carledwinj.testes.unitarios.matchers.DiaSemanaMatcher;
-import com.wordpress.carledwinj.testes.unitarios.matchers.MachersProprios;
+import com.wordpress.carledwinj.testes.unitarios.matchers.MatchersProprios;
+import com.wordpress.carledwinj.testes.unitarios.matchers.MatchersProprios;
 //import com.wordpress.carledwinj.testes.unitarios.servicos.LocacaoService; //nao esta sendo importado pois esta no pacote com o mesmo nome
 import com.wordpress.carledwinj.testes.unitarios.utils.DataUtils;
 
@@ -70,9 +72,78 @@ public class LocacaoServiceMockAnotacoesTest {
 	public void setUp() {
 		MockitoAnnotations.initMocks(this);
 	}
+
+
+	@Test
+	public void deveProrrogarLocacaoComCaptorCapturandoExatamenteAInstanciaEnviadaParaOSalvar() {
+		//cenario
+		Locacao novaLocacao = LocacaoBuilder.umLocacao().agora();
+		
+		
+		//Dentro deste metodo existe outra instancia de locacao novaLocacao
+		//acao
+		locacaoService.prorrogarLocacao(novaLocacao, 3);
+		
+		//captura
+		
+		ArgumentCaptor<Locacao> argumentCaptorLocacao = ArgumentCaptor.forClass(Locacao.class);
+		
+		//verificacao		
+		Mockito.verify(locacaoDAO).salvar(argumentCaptorLocacao.capture());
+		
+		Locacao locacaoRetornada = argumentCaptorLocacao.getValue();//para capturar o parametro passado
+		//Locacao locacaoRetornada = argumentCaptorLocacao.getAllValues();//para recuperar todos os parametros passados
+		
+		/*Captura somente um erro por vez
+		 * Assert.assertThat(locacaoRetornada.getValor(), CoreMatchers.is(15.0));
+		Assert.assertThat(locacaoRetornada.getDataLocacao(), MatchersProprios.eHoje());
+		Assert.assertThat(locacaoRetornada.getDataLocacao(), MatchersProprios.eHojeComDiferencaDias(3));*/
+		
+		/*Iremos capturar todos os erros de uma so vez*/
+		errorCollector.checkThat(locacaoRetornada.getValor(), CoreMatchers.is(154.0));
+		errorCollector.checkThat(locacaoRetornada.getDataLocacao(), MatchersProprios.eHoje());
+		errorCollector.checkThat(locacaoRetornada.getDataLocacao(), MatchersProprios.eHojeComDiferencaDias(3));
+	}
 	
 	@Test
-	public void testeUsuarioNegativadoVerifyGenerico() throws FilmeSemEstoqueException {
+	public void deveProrrogarLocacao() {
+		//cenario
+		Locacao novaLocacao = LocacaoBuilder.umLocacao().agora();
+		
+		
+		//Dentro deste metodo existe outra instancia de locacao novaLocacao
+		//acao
+		locacaoService.prorrogarLocacao(novaLocacao, 3);
+		
+		
+		//verificacao
+		//este verify nao funciona pois sao duas instancias distintas
+		//Mockito.verify(locacaoDAO).salvar(novaLocacao);
+		
+		//este verify funciona pois a instancia e generica
+		Mockito.verify(locacaoDAO).salvar(Mockito.any(Locacao.class));
+	}
+	
+	
+	@Test
+	public void deveTratarErroNoSPC() throws Exception {
+		//cenario
+		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
+		List<Filme> filmes = Arrays.asList(FilmeBuilder.novoFilmeDefault().build());
+		
+		//expetativa
+		Mockito.when(spcService.possuiNegativacao(usuario)).thenThrow(new Exception("Problemas com SPC, tente novamente"));
+		
+		//verificacao
+		expectedException.expect(LocacaoException.class);
+		expectedException.expectMessage("Problemas com SPC, tente novamente");
+		
+		//acao
+		locacaoService.alugarFilme(usuario, filmes);
+	}
+	
+	@Test
+	public void testeUsuarioNegativadoVerifyGenerico() throws Exception {
 
 		// cenario
 		List<Filme> filmes = Arrays.asList(FilmeBuilder.novoFilmeDefault().build());
@@ -155,7 +226,7 @@ public class LocacaoServiceMockAnotacoesTest {
 	}
 	
 	@Test
-	public void testeUsuarioNegativadoVerifyException() throws FilmeSemEstoqueException {
+	public void testeUsuarioNegativadoVerifyException() throws Exception {
 
 		// cenario
 		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
@@ -186,7 +257,7 @@ public class LocacaoServiceMockAnotacoesTest {
 	
 	
 	@Test
-	public void testeUsuarioNegativadoException() throws FilmeSemEstoqueException, LocacaoException {
+	public void testeUsuarioNegativadoException() throws Exception {
 
 		// cenario
 		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
@@ -220,8 +291,8 @@ public class LocacaoServiceMockAnotacoesTest {
 			locacao = locacaoService.alugarFilme(UsuarioBuilder.novoUsuarioDefault().build(), filmes);
 			
 			 errorCollector.checkThat(locacao.getValor(), is(5.0));
-			 errorCollector.checkThat(locacao.getDataLocacao(), MachersProprios.eHoje());
-			 errorCollector.checkThat(locacao.getDataRetorno(), MachersProprios.eHojeComDiferencaDias(1));
+			 errorCollector.checkThat(locacao.getDataLocacao(), MatchersProprios.eHoje());
+			 errorCollector.checkThat(locacao.getDataRetorno(), MatchersProprios.eHojeComDiferencaDias(1));
 			 
 		} catch (Exception e) {
 			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
@@ -246,8 +317,8 @@ public class LocacaoServiceMockAnotacoesTest {
 			//verificacao
 			
 			assertThat(locacao.getDataRetorno(), new DiaSemanaMatcher(Calendar.MONDAY));
-			assertThat(locacao.getDataRetorno(), MachersProprios.caiEm(Calendar.MONDAY));
-			assertThat(locacao.getDataRetorno(), MachersProprios.caiNumaSegunda(Calendar.MONDAY));
+			assertThat(locacao.getDataRetorno(), MatchersProprios.caiEm(Calendar.MONDAY));
+			assertThat(locacao.getDataRetorno(), MatchersProprios.caiNumaSegunda(Calendar.MONDAY));
 			
 		} catch (Exception e) {
 			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
@@ -310,7 +381,7 @@ public class LocacaoServiceMockAnotacoesTest {
 	}
 	
 	@Test
-	public void testeRobustoLocacaoUsuarioNuloException() throws FilmeSemEstoqueException {
+	public void testeRobustoLocacaoUsuarioNuloException() throws Exception {
 
 		// cenario
 		List<Filme> filmes = Arrays.asList(FilmeBuilder.novoFilmeDefault().build());

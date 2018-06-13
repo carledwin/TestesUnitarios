@@ -6,6 +6,8 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.Test;
+
 import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAO;
 import com.wordpress.carledwinj.testes.unitarios.daos.LocacaoDAOFake;
 import com.wordpress.carledwinj.testes.unitarios.entidades.Filme;
@@ -25,8 +27,17 @@ public class LocacaoService {
 	private SPCService spcService;
 	private EmailService emailService;
 	
+	public void prorrogarLocacao(Locacao locacao, int dias) {
+		Locacao novaLocacao =new Locacao();
+		novaLocacao.setUsuario(locacao.getUsuario());
+		novaLocacao.setFilmes(locacao.getFilmes());
+		novaLocacao.setValor(locacao.getValor() * dias);
+		novaLocacao.setDataLocacao(new Date());
+		novaLocacao.setDataRetorno(DataUtils.obterDataComDiferencaDias(dias));
+		locacaoDAO.salvar(novaLocacao);
+	}
 
-	public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws FilmeSemEstoqueException, LocacaoException {
+	public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws LocacaoException, FilmeSemEstoqueException {
 
 		if (filmes == null || filmes.isEmpty()) {
 			throw new LocacaoException("Filmes vazio");
@@ -42,7 +53,14 @@ public class LocacaoService {
 			throw new LocacaoException("Usuario vazio");
 		}
 
-		if(spcService.possuiNegativacao(usuario)) {
+		boolean negativado;
+		try {
+			negativado = spcService.possuiNegativacao(usuario);
+		} catch (Exception e) {
+			throw new LocacaoException("Problemas com SPC, tente novamente");
+		}
+		
+		if(negativado) {
 			throw new LocacaoException("Usuario Negativado");
 		}
 		

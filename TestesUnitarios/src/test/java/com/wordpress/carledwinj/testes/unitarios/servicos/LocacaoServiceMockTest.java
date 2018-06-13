@@ -36,7 +36,7 @@ import com.wordpress.carledwinj.testes.unitarios.entidades.Usuario;
 import com.wordpress.carledwinj.testes.unitarios.exception.FilmeSemEstoqueException;
 import com.wordpress.carledwinj.testes.unitarios.exception.LocacaoException;
 import com.wordpress.carledwinj.testes.unitarios.matchers.DiaSemanaMatcher;
-import com.wordpress.carledwinj.testes.unitarios.matchers.MachersProprios;
+import com.wordpress.carledwinj.testes.unitarios.matchers.MatchersProprios;
 //import com.wordpress.carledwinj.testes.unitarios.servicos.LocacaoService; //nao esta sendo importado pois esta no pacote com o mesmo nome
 import com.wordpress.carledwinj.testes.unitarios.utils.DataUtils;
 
@@ -68,7 +68,7 @@ public class LocacaoServiceMockTest {
 	}
 	
 	@Test
-	public void testeUsuarioNegativadoVerifyGenerico() throws FilmeSemEstoqueException {
+	public void testeUsuarioNegativadoVerifyGenerico() throws Exception {
 
 		// cenario
 		List<Filme> filmes = Arrays.asList(FilmeBuilder.novoFilmeDefault().build());
@@ -169,7 +169,7 @@ public class LocacaoServiceMockTest {
 	}
 	
 	@Test
-	public void testeUsuarioNegativadoVerifyException() throws FilmeSemEstoqueException {
+	public void testeUsuarioNegativadoVerifyException() throws Exception {
 
 		// cenario
 		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
@@ -204,7 +204,7 @@ public class LocacaoServiceMockTest {
 	
 	
 	@Test
-	public void testeUsuarioNegativadoException() throws FilmeSemEstoqueException, LocacaoException {
+	public void testeUsuarioNegativadoException() throws Exception {
 
 		// cenario
 		Usuario usuario = UsuarioBuilder.novoUsuarioDefault().build();
@@ -240,8 +240,8 @@ public class LocacaoServiceMockTest {
 			locacao = locacaoService.alugarFilme(UsuarioBuilder.novoUsuarioDefault().build(), filmes);
 			
 			 errorCollector.checkThat(locacao.getValor(), is(5.0));
-			 errorCollector.checkThat(locacao.getDataLocacao(), MachersProprios.eHoje());
-			 errorCollector.checkThat(locacao.getDataRetorno(), MachersProprios.eHojeComDiferencaDias(1));
+			 errorCollector.checkThat(locacao.getDataLocacao(), MatchersProprios.eHoje());
+			 errorCollector.checkThat(locacao.getDataRetorno(), MatchersProprios.eHojeComDiferencaDias(1));
 			 
 		} catch (Exception e) {
 			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);
@@ -266,8 +266,8 @@ public class LocacaoServiceMockTest {
 			//verificacao
 			
 			assertThat(locacao.getDataRetorno(), new DiaSemanaMatcher(Calendar.MONDAY));
-			assertThat(locacao.getDataRetorno(), MachersProprios.caiEm(Calendar.MONDAY));
-			assertThat(locacao.getDataRetorno(), MachersProprios.caiNumaSegunda(Calendar.MONDAY));
+			assertThat(locacao.getDataRetorno(), MatchersProprios.caiEm(Calendar.MONDAY));
+			assertThat(locacao.getDataRetorno(), MatchersProprios.caiNumaSegunda(Calendar.MONDAY));
 			
 		} catch (Exception e) {
 			Assert.fail("Ocorreu uma falha, nao deveria lancar exception. Cause: " + e);

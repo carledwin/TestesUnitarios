@@ -2,12 +2,36 @@ package com.wordpress.carledwinj.testes.unitarios.servicos;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
 import com.wordpress.carledwinj.testes.unitarios.entidades.Calculadora;
 
 public class CalculadoraMockTest {
 
+	
+	@Test
+	public void testeSucessoCaptor() {
+		
+		//cenario
+		Calculadora calculadora = Mockito.mock(Calculadora.class);
+		
+		//espectativa de captura
+		ArgumentCaptor<Integer> argumentCaptorInteger = ArgumentCaptor.forClass(Integer.class);
+		
+		//espectativa com captor
+		/*Mockito.when(calculadora.soma(1, 2)).thenReturn(5); //ok*/
+		//Mockito.when(calculadora.soma(argumentCaptorInteger.capture(), 2)).thenReturn(5);//erro pois os dois devem ser matchers
+		//Mockito.when(calculadora.soma(argumentCaptorInteger.capture(), Mockito.anyInt())).thenReturn(5);// ok
+		Mockito.when(calculadora.soma(argumentCaptorInteger.capture(), argumentCaptorInteger.capture())).thenReturn(5);
+		
+		//acao
+		System.out.println("testeSucesso  >>>>  " + calculadora.soma(1, 2));
+		
+		//captura
+		System.out.println("Captor last value: " + argumentCaptorInteger.getValue());
+		System.out.println("Captor all values: " + argumentCaptorInteger.getAllValues());
+	}
 	
 	@Test
 	public void testeSucesso() {

@@ -2,7 +2,7 @@ package com.wordpress.carledwinj.testes.unitarios.matchers;
 
 import java.util.Calendar;
 
-public class MachersProprios {
+public class MatchersProprios {
 
 	public static DiaSemanaMatcher caiEm(Integer diaSemana) {
 		return new DiaSemanaMatcher(diaSemana);
